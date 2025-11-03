@@ -2,7 +2,7 @@
 #include "../comms.h"
 
 #define MIXAR
-#define PONTO_ZERO { .x = 2815, .y = 2290 }
+#define RECALIBRAR
 
 #define BAUD_RATE 9600
 #define ADC_MAX ((1<<12)-1)
@@ -14,7 +14,7 @@
 #define EIXO_Y 1
 #define BOTAO  9
 
-#define PEER_ADDR gesonel
+#define PEER_ADDR broadcast
 
 struct par {
     union {
@@ -22,6 +22,12 @@ struct par {
         struct { int16_t esq, dir; };
     };
 };
+
+#ifndef RECALIBRAR
+  const struct par PONTO_ZERO = { .x = 2815, .y = 2290 };
+#else
+  struct par PONTO_ZERO;
+#endif
 
 volatile bool inverter = false;
 volatile unsigned long ultimo_clique = 0;
@@ -38,6 +44,13 @@ void setup() {
     pinMode(EIXO_Y, INPUT);
     pinMode(BOTAO, INPUT);
 
+  #ifdef RECALIBRAR
+    PONTO_ZERO = (struct par){
+        .x = analogRead(EIXO_X),
+        .y = analogRead(EIXO_Y),
+    };
+  #endif
+
     init_wifi();
     uint8_t* mac_addr = get_mac_addr();
 
@@ -51,7 +64,7 @@ void setup() {
         .encrypt = false,
     };
     memcpy(peer.peer_addr, PEER_ADDR, sizeof(PEER_ADDR));
-    
+
     esp_err_t err = esp_now_add_peer(&peer);
     assert (err == ESP_OK);
 
@@ -67,7 +80,7 @@ void loop() {
         if (*buf == sentinel) {
             *buf = '\0';
             esp_err_t err = send_str(PEER_ADDR, input);
-            
+
             //! print
             Serial.printf("%s ", input); 
             if (err == ESP_OK) Serial.printf("-> Serial: success\n");
@@ -110,10 +123,10 @@ esp_err_t send_str(uint8_t addr[6], const char* str) {
         .len = (uint8_t)strlen(str),
     };
     strcpy(msg.vels, str);
-    
+
     uint8_t*  ptr = (uint8_t*) &msg;
     esp_err_t err = esp_now_send(addr, ptr, sizeof(msg));
-    
+
     return err;
 }
 
