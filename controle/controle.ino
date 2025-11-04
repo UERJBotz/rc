@@ -2,12 +2,14 @@
 #include "../comms.h"
 
 #define MIXAR
+#define SUAVIZAR
 #define RECALIBRAR
 
 #define INVERTER_ESQ_DIR
 
 #define BAUD_RATE 9600
 #define ADC_MAX ((1<<12)-1)
+#define ADC_MID (ADC_MAX/2)
 
 //#define PWM_MAX ((1<<10)-1)
 #define PWM_MAX 127
@@ -97,9 +99,10 @@ void loop() {
         .y = analogRead(EIXO_Y),
     };
     struct par pos_norm = deadzone(pos.x, pos.y);
+    struct par pos_suave = suavizar(pos_norm.x, pos_norm.y);
     struct par pos_pwm = {
-        .x = adc_to_pwm(pos_norm.x),
-        .y = adc_to_pwm(pos_norm.y),
+        .x = adc_to_pwm(pos_suave.x),
+        .y = adc_to_pwm(pos_suave.y),
     };
     if (inverter) {
         pos_pwm.x = pos_pwm.x;
@@ -146,6 +149,19 @@ struct par deadzone(int16_t x, int16_t y) {
              map(y, zero.y,ADC_MAX, ADC_MAX/2, ADC_MAX) :
              map(y, 0,     zero.y,  0,       ADC_MAX/2),
     };
+}
+
+struct par suavizar(int32_t x, int32_t y) {
+  #ifdef SUAVIZAR
+    // isso segue a curva f(x) = ((x/MAX)²)*MAX = x²/MAX
+    // olha no geogebra, comparando com f(x) = x
+    return {
+        .x = (int16_t)(x*x/ADC_MID),
+        .y = (int16_t)(y*y/ADC_MID),
+    };
+  #else
+    return { .x = x, .y = y };
+  #endif
 }
 int16_t adc_to_pwm(unsigned long adc) {
     return map(adc, 0,ADC_MAX, -PWM_MAX,PWM_MAX);
