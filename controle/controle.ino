@@ -85,10 +85,7 @@ void setup() {
   #endif
 
   #ifdef RECALIBRAR
-    PONTO_ZERO = {
-        .x = (int16_t)analogRead(EIXO_X),
-        .y = (int16_t)analogRead(EIXO_Y),
-    };
+    PONTO_ZERO = analogico();
   #endif
 
     init_wifi();
@@ -99,7 +96,7 @@ void setup() {
                   mac_addr[0], mac_addr[1], mac_addr[2],
                   mac_addr[3], mac_addr[4], mac_addr[5]);
 
-    Serial.printf("PONTO ZERO: %d, %d", PONTO_ZERO.x, PONTO_ZERO.y);
+    Serial.printf("PONTO ZERO: %d, %d\n", PONTO_ZERO.x, PONTO_ZERO.y);
 
     static esp_now_peer_info_t peer {
         .channel = 0,
@@ -138,44 +135,22 @@ void loop() {
   #endif
 
     struct par arma = vels_arma();
-
-    struct par pos = {
-        .x = (int16_t)analogRead(EIXO_X),
-        .y = (int16_t)analogRead(EIXO_Y),
-    };
-    struct par pos_norm  = deadzone(pos.x, pos.y);
-    struct par pos_sinal = sinalizar(pos_norm.x, pos_norm.y);
-    struct par pos_suave = suavizar(pos_sinal.x, pos_sinal.y);
-    struct par pos_pwm = {
-        .x = adc_to_pwm(pos_suave.x),
-        .y = adc_to_pwm(pos_suave.y),
-    };
-    if (inverter) {
-        pos_pwm.x = pos_pwm.x;
-        pos_pwm.y = -pos_pwm.y;
-    }
-    struct par vel = mixar(pos_pwm.x, pos_pwm.y);
+    struct par roda = vels_roda();
 
     char vels[255], *next = vels;
-    if (inverter_esq_dir) next += sprintf(next, "%d %d ", vel.esq, vel.dir);
-    else                  next += sprintf(next, "%d %d ", vel.dir, vel.esq);
+    if (inverter_esq_dir) next += sprintf(next,"%d %d ", roda.esq,roda.dir);
+    else                  next += sprintf(next,"%d %d ", roda.dir,roda.esq);
     #if defined(INTERRUPTOR_ARMA) || defined(INTERRUPTOR_ARMA_SEC)
-        next += sprintf(next, "%d %d", arma.a, arma.b);
+        next += sprintf(next, "%d %d", arma.a,arma.b);
     #endif
     next += sprintf(next, "\n");
 
+    #ifdef DEBUG_INTERRUPTORES
+        Serial.printf("ied:%1d, ift:%1d,%5d,%5d: ", inverter_esq_dir, inverter, arma.a, arma.b);
+    #endif
+
     esp_err_t err = send_str(PEER_ADDR, vels);
 
-    #ifdef DEBUG_INTERRUPTORES
-        Serial.printf("%2d,%2d,%5d,%5d: ", inverter_esq_dir, inverter, arma.a, arma.b);
-    #endif
-
-    #ifdef DEBUG_JOY_CONV
-        Serial.printf("%5d,%5d: ", pos.x, pos.y);
-        Serial.printf("%5d,%5d: ", pos_norm.x, pos_norm.y);
-        Serial.printf("%5d,%5d: ", pos_pwm.x, pos_pwm.y);
-        Serial.printf("%5d,%5d " , vel.esq, vel.dir);
-    #endif
     if (err == ESP_OK) Serial.printf("-> Joystick: success\n");
     else               Serial.printf("-> Joystick: error\n");
 }
@@ -195,14 +170,13 @@ esp_err_t send_str(uint8_t addr[6], const char* str) {
 
 struct par vels_arma() {
     int16_t vel_arma = 0;
-    int16_t vel_arma_sec = 0;
-
   #if   defined(INTERRUPTOR_ARMA)
     vel_arma = digital_to_pwm(digitalRead(INTERRUPTOR_ARMA));
   #elif defined(EIXO_ARMA)
     vel_arma = adc_to_pwm(analogRead(EIXO_ARMA));
   #endif
 
+    int16_t vel_arma_sec = 0;
   #if   defined(INTERRUPTOR_ARMA_SEC)
     vel_arma_sec = digital_to_pwm(digitalRead(INTERRUPTOR_ARMA_SEC));
   #elif defined(EIXO_ARMA_SEC)
@@ -210,6 +184,40 @@ struct par vels_arma() {
   #endif
 
   return { .a = vel_arma, .b = vel_arma_sec };
+}
+
+struct par vels_roda() {
+    struct par pos = analogico_corrigido();
+    struct par pos_pwm = {
+        .x = adc_to_pwm(pos.x),
+        .y = adc_to_pwm(pos.y),
+    };
+    if (inverter) {
+        pos_pwm.x = +pos_pwm.x;
+        pos_pwm.y = -pos_pwm.y;
+    }
+    struct par vel = mixar(pos_pwm.x, pos_pwm.y);
+
+    #ifdef DEBUG_JOY_CONV
+        Serial.printf("%5d,%5d: ", pos.x, pos.y);
+        Serial.printf("%5d,%5d: ", pos_pwm.x, pos_pwm.y);
+        Serial.printf("%5d,%5d " , vel.esq, vel.dir);
+    #endif
+    return vel;
+}
+
+struct par analogico_corrigido() {
+    struct par pos = analogico();
+    pos = deadzone (pos.x, pos.y);
+    pos = sinalizar(pos.x, pos.y);
+    pos = suavizar (pos.x, pos.y);
+    return pos;
+}
+struct par analogico() {
+    return {
+        .x = (int16_t)analogRead(EIXO_X),
+        .y = (int16_t)analogRead(EIXO_Y),
+    };
 }
 
 struct par deadzone(int16_t x, int16_t y) {
@@ -229,7 +237,6 @@ struct par sinalizar(int16_t x, int16_t y) {
         .y = map(y, 0,ADC_MAX, -ADC_MAX,ADC_MAX),
     };
 }
-
 struct par suavizar(int32_t x, int32_t y) {
   #ifdef SUAVIZAR
     // isso segue a curva f(x) = ((x/MAX)²)*MAX = x²/MAX (mas com sinal)
