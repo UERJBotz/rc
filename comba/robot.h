@@ -30,8 +30,7 @@ uint32_t batt(void);         //mV
     }
     void hite(vel_t){}
     void bipe(int dt) {
-        move(20, 20);
-        delay(dt);
+        move(20, 20); delay(dt);
         move(0, 0);
     }
     uint32_t batt() {
@@ -86,14 +85,13 @@ uint32_t batt(void);         //mV
       #endif
     }
     void bipe(int dt) { //! números do bipe
-        move(20, 20);
-        delay(dt);
+        move(20, 20); delay(dt);
         move(0, 0);
     }
     uint32_t batt() {
       #ifdef BAT
         #warning "leitura da bateria provavelmente incorreta!"
-        return analogRead(bat); //! mV
+        return analogRead(BAT); //! mV
       #else
         #warning "leitura da bateria hardcoded!"
         return 8000; //mV
