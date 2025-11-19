@@ -15,9 +15,16 @@
 //#define PWM_MAX ((1<<10)-1) /*1023*/
 #define PWM_MAX 127 /*((1<<7)-1)*/
 
-#define EIXO_X 2
-#define EIXO_Y 1
-#define BOTAO  9
+//! fazer que nem o comba, com include controle_x.h
+#if   defined(BRANCO_1_J)
+  #define EIXO_X 2
+  #define EIXO_Y 1
+  #define BOTAO  9
+#elif defined(TRANSP_2_J)
+  #define EIXO_X 11
+  #define EIXO_Y 10
+  #define BOTAO  9
+#endif
 
 #define INTERRUPTOR_INVERTER_ESQ_DIR 8
 #define __INTERRUPTOR_MIXAR          7 /*! implementar */
@@ -66,6 +73,11 @@ void setup() {
     pinMode(EIXO_Y, INPUT);
     pinMode(BOTAO, INPUT);
 
+  #if defined(LED_BUILTIN)
+    pinMode(LED_BUILTIN, OUTPUT);
+    digitalWrite(LED_BUILTIN, HIGH);
+  #endif
+
   #if defined(INTERRUPTOR_INVERTER_ESQ_DIR)
     pinMode(INTERRUPTOR_INVERTER_ESQ_DIR, INPUT_PULLDOWN);
   #endif
@@ -78,6 +90,7 @@ void setup() {
   #elif defined(EIXO_ARMA)
     pinMode(EIXO_ARMA, INPUT);
   #endif
+
   #if   defined(INTERRUPTOR_ARMA_SEC)
     pinMode(INTERRUPTOR_ARMA_SEC, INPUT_PULLDOWN);
   #elif defined(EIXO_ARMA_SEC)
@@ -183,7 +196,7 @@ struct par vels_arma() {
     vel_arma_sec = adc_to_pwm(analogRead(EIXO_ARMA_SEC));
   #endif
 
-  return { .a = vel_arma, .b = vel_arma_sec };
+    return { .a = vel_arma, .b = vel_arma_sec };
 }
 
 struct par vels_roda() {
