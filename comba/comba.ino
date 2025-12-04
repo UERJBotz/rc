@@ -3,7 +3,7 @@
 //#define CONTROLE controle_branco_1_joystick
 #define VEL_MAX 127
 #include "gesonel.h" // esse include muda os pinos do robô
-#include "robot.h"   // esse tem uma implementação genérica dos robôs
+#include "_robot.h"  // esse tem uma implementação genérica dos robôs
 #include "_comms.h"
 
 #define BAUD_RATE 115200
