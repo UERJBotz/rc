@@ -58,6 +58,8 @@ void setup() {
 
     robot_setup();
     espnow_setup(on_recv);
+
+    digitalWrite(LED_BUILTIN, LOW);
 }
 
 void loop() {
