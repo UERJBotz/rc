@@ -4,6 +4,10 @@
 #define MIXAR
 #define SUAVIZAR
 #define RECALIBRAR
+#include "controle_branco.h" // muda os pinos e configurações do controle
+
+// ideia: INTERRUPTOR_MIXAR
+//! lidar melhor com o(s) botão(ões)
 
 #define DEBUG_INTERRUPTORES
 #define DEBUG_JOY_CONV
@@ -14,41 +18,12 @@
 
 //#define PWM_MAX ((1<<10)-1) /*1023*/
 #define PWM_MAX 127 /*((1<<7)-1)*/
+#define PEER_ADDR broadcast
 
-// ideia: INTERRUPTOR_MIXAR
-//! lidar melhor com o(s) botão(ões)
-
-//! fazer que nem o comba, com include controle_x.h
-#define BRANCO_1_J //! MUDAR PRA CADA CONTROLE
-#if   defined(BRANCO_1_J)
-  #define EIXO_X 2
-  #define EIXO_Y 1
-  #define BOTAO  9
-
-  #define INTERRUPTOR_INVERTER         6
-  #define INTERRUPTOR_INVERTER_ESQ_DIR 7
-#elif defined(X_1_J_VERMELHO) //! pode tar trocado
-  #define EIXO_X 1
-  #define EIXO_Y 0
-  #define BOTAO  10
-
-  #define ARMA_DIGITAL
-  #define ARMA_SEC_DIGITAL
-  #define EIXO_ARMA     6
-  #define EIXO_ARMA_SEC 5
-#elif defined(X_1_J_PRETO) //! pode tar trocado
-  #define EIXO_X 1
-  #define EIXO_Y 0
-  #define BOTAO  10
-#elif defined(YURI_2_J) //! inventado
-  #define EIXO_X 1
-  #define EIXO_Y 0
-  #define BOTAO  10
-#else
-  #error "definir controle"
+#ifndef PONTO_ZERO
+  #define PONTO_ZERO { ADC_MAX/2, ADC_MAX/2 }
 #endif
 
-#define PEER_ADDR broadcast
 
 struct par {
     union {
@@ -59,7 +34,7 @@ struct par {
     };
 };
 
-struct par ponto_zero = { .x = 2815, .y = 2290 };
+struct par ponto_zero = PONTO_ZERO;
 bool inverter_esq_dir = false;
 
 volatile bool inverter = false;
@@ -78,7 +53,7 @@ void setup() {
     pinMode(BOTAO, INPUT);
 
     pinMode(LED_BUILTIN, OUTPUT);
-    digitalWrite(LED_BUILTIN, HIGH);
+    digitalWrite(LED_BUILTIN, LOW); //! isso muda, lidar melhor
 
   #if defined(INTERRUPTOR_INVERTER_ESQ_DIR)
     pinMode(INTERRUPTOR_INVERTER_ESQ_DIR, INPUT_PULLDOWN);
@@ -111,7 +86,7 @@ void setup() {
     uint8_t* mac_addr = get_mac_addr();
 
     Serial.begin(BAUD_RATE);
-    Serial.printf("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
+    Serial.printf("MAC: {0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X}\n",
                   mac_addr[0], mac_addr[1], mac_addr[2],
                   mac_addr[3], mac_addr[4], mac_addr[5]);
 
@@ -202,10 +177,8 @@ struct par vels_roda() {
         .x = adc_to_pwm(pos.x),
         .y = adc_to_pwm(pos.y),
     };
-    if (inverter) {
-        pos_pwm.x = +pos_pwm.x;
-        pos_pwm.y = -pos_pwm.y;
-    }
+    if (inverter_esq_dir) pos_pwm.x = -pos_pwm.x;
+    if (inverter)         pos_pwm.y = -pos_pwm.y;
     struct par vel = mixar(pos_pwm.x, pos_pwm.y);
 
     #ifdef DEBUG_JOY_CONV
@@ -214,10 +187,7 @@ struct par vels_roda() {
         Serial.printf("%5d,%5d " , vel.esq, vel.dir);
     #endif
 
-    if (inverter_esq_dir) return {
-        .esq = vel.dir,
-        .dir = vel.esq,
-    }; else return vel;
+    return vel;
 }
 
 struct par analogico_corrigido() {
