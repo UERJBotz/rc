@@ -3,6 +3,9 @@
 #endif
 #define COMBA
 
+
+#define CONTROLE controle_branco
+
 #define LED D4
 
 #define motor_esq_m1 D5

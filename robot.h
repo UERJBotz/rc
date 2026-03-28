@@ -20,7 +20,7 @@ uint32_t batt(void);         //mV
     VespaButton  button;
     VespaBattery vbat;
     VespaMotors  motors;
-    
+
     void robot_setup(void){}
     void move(vel_t esq, vel_t dir) {
         motors.turn(

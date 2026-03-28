@@ -1,9 +1,8 @@
 #include <Arduino.h>
 
-//#define CONTROLE controle_branco_1_joystick
 #define VEL_MAX 127
-#include "gesonel.h" // esse include muda os pinos do robô
-#include "_robot.h"  // esse tem uma implementação genérica dos robôs
+#include "soldado.h" // esse include muda os pinos e controle do robô
+#include "_robot.h" // esse tem uma implementação genérica dos robôs
 #include "_comms.h"
 
 #define BAUD_RATE 115200
@@ -59,7 +58,7 @@ void setup() {
     robot_setup();
     espnow_setup(on_recv);
 
-    digitalWrite(LED_BUILTIN, LOW);
+    digitalWrite(LED_BUILTIN, LOW); //! isso muda
 }
 
 void loop() {
