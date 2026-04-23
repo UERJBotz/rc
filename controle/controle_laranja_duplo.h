@@ -3,11 +3,10 @@
 #endif
 #define CONTROLE "yuri_2j"
 
-//! inventado, rever
+#define EIXO_X 3
+#define EIXO_Y 4
+#define BOTAO  1
 
-#define EIXO_X 1
-#define EIXO_Y 0
-#define BOTAO  10
-
-#define EIXO_ARMA 5
-#define EIXO_ARMA_SEC 6
+#define EIXO_ARMA     0
+#define EIXO_ARMA_SEC 2
+#define _BOTAO_2 6
