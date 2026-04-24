@@ -3,7 +3,7 @@
 #endif
 #define COMBA
 
-// essas plaquinhas com a ponte h vermelha e o esp866
+// Wemos D1 mini (clone) - esp8266 (+ l298n)
 //! chamar de abelhas em vez de soldados (brincadeira com a vespa da robocore)
 
 #define CONTROLE controle_branco

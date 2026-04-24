@@ -3,6 +3,9 @@
 #endif
 #define COMBA
 
+// wemos d1 mini (clone) - esp8266
+// wemos d1 mini (clone) - esp8266
+
 
 #define CONTROLE controle_branco
 

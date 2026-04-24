@@ -3,6 +3,9 @@
 #endif
 #define COMBA
 
+// wemos d1 mini (clone) - esp8266 (+ l298n)
+// é uma abelha mas é um mini, tenho que ver de trocar isso
+
 #define CONTROLE controle_roxo_j_verm
 
 #define LED LED_BUILTIN
