@@ -40,16 +40,34 @@ uint32_t batt(void);         //mV
     #if LED_BUILTIN && !defined(LED)
         #define LED LED_BUILTIN
     #endif
+    #if defined(ESC_ARMA)
+        #if defined(motor_arma_m1) || defined(motor_arma_m2)
+            #error "escolha entre esc e ponte h para a arma"
+        #endif
+
+        #include <Servo.h>
+        Servo arma;
+    #endif
+
     void robot_setup(void) {
-        #ifdef ESC
-            pinMode(ESC, OUTPUT);
-        #endif
-        #ifdef LED
-            pinMode(LED, OUTPUT);
-        #endif
-        #ifdef BAT
-            pinMode(BAT, INPUT);
-        #endif
+      #ifdef LED
+        pinMode(LED, OUTPUT);
+      #endif
+      #ifdef BAT
+        pinMode(BAT, INPUT);
+      #endif
+
+      #ifdef ESC_ARMA
+        arma.attach(ESC_ARMA);
+      #endif
+
+      #if defined(motor_arma_m1) && defined(motor_arma_m2)
+        pinMode(motor_arma_m1, OUTPUT);
+        pinMode(motor_arma_m2, OUTPUT);
+      #elif defined(motor_arma_m1) || defined(motor_arma_m2)
+        #error "defina ambos os pinos do motor da arma"
+      #endif
+
         pinMode(motor_esq_m1, OUTPUT);
         pinMode(motor_dir_m2, OUTPUT);
         pinMode(motor_esq_m1, OUTPUT);
@@ -67,7 +85,7 @@ uint32_t batt(void);         //mV
     void move(vel_t esq, vel_t dir) {
         esq = constrain(
             map(esq, -VEL_MAX, VEL_MAX, -1023, 1023),
-            -1023, 1024
+            -1023, 1023
         );
         dir = constrain(
             map(dir, -VEL_MAX, VEL_MAX, -1023, 1023),
@@ -79,9 +97,17 @@ uint32_t batt(void);         //mV
     }
 
     void hite(vel_t vel) {
-      #ifdef ESC
-        #warning "esc provavelmente não funciona!"
-        analogWrite(ESC, map(vel, -VEL_MAX, VEL_MAX, -1023, 1023));
+      #ifdef ARMA_DIGITAL
+        vel = map(vel, -VEL_MAX, VEL_MAX, 0, VEL_MAX);
+      #endif //! ver jeito melhor de lidar com isso
+
+      #ifdef ESC_ARMA
+        #warning "esc experimental!"
+        arma.write(map(vel, -VEL_MAX, VEL_MAX, 0, 180));
+      #endif
+
+      #if defined(motor_arma_m1) && defined(motor_arma_m2)
+        motor(motor_arma_m1, motor_arma_m2, vel);
       #endif
     }
     void bipe(int dt) { //! números do bipe
@@ -90,7 +116,7 @@ uint32_t batt(void);         //mV
     }
     uint32_t batt() {
       #ifdef BAT
-        #warning "leitura da bateria provavelmente incorreta!"
+        #warning "leitura da bateria deve tar errada!"
         return analogRead(BAT); //! mV
       #else
         #warning "leitura da bateria hardcoded!"
@@ -98,6 +124,6 @@ uint32_t batt(void);         //mV
       #endif
     }
 #else
-    static_assert(0, "robôs por enquanto só vespa ou comba");
+    #error "robôs por enquanto só vespa ou comba"
 #endif
 
