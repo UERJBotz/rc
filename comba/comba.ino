@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 #define VEL_MAX 127
-#include "soldado.h" // esse include muda os pinos e controle do robô
+#include "g3.h" // esse include muda os pinos e controle do robô
 #include "_robot.h" // esse tem uma implementação genérica dos robôs
 #include "_comms.h"
 
@@ -70,7 +70,7 @@ void loop() {
     }
 
     move(vel_rodas.esq, vel_rodas.dir);
-    hite(vel_esc.esq);
+    hite(vel_esc.esq, vel_esc.dir);
 
     //! print
     Serial.printf("vels %d %d, esc %d %d, n/a %d %d\n",

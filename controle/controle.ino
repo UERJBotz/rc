@@ -198,6 +198,10 @@ struct par analogico_corrigido() {
     return pos;
 }
 struct par analogico() {
+    Serial.printf("%d %d",
+        (int16_t)analogReadMilliVolts(EIXO_X),
+        (int16_t)analogReadMilliVolts(EIXO_Y)
+    );
     return {
         .x = (int16_t)analogRead(EIXO_X),
         .y = (int16_t)analogRead(EIXO_Y),

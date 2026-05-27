@@ -2,7 +2,7 @@ typedef int16_t vel_t;
 
 void     robot_setup(void);
 void     move(vel_t, vel_t); //-VEL_MAX a VEL_MAX
-void     hite(vel_t);        //-VEL_MAX a VEL_MAX
+void     hite(vel_t, vel_t=0); //-VEL_MAX a VEL_MAX
 void     bipe(int);          //millis
 uint32_t batt(void);         //mV
 
@@ -40,13 +40,16 @@ uint32_t batt(void);         //mV
     #if LED_BUILTIN && !defined(LED)
         #define LED LED_BUILTIN
     #endif
-    #if defined(ESC_ARMA)
+    #if defined(ESC_ARMA) || defined(ESC_ARMA_SEC)
         #if defined(motor_arma_m1) || defined(motor_arma_m2)
             #error "escolha entre esc e ponte h para a arma"
         #endif
+        #warning "esc experimental!"
+        //! falta checar melhor erros e tal
 
         #include <Servo.h>
         Servo arma;
+        Servo arma_sec;
     #endif
 
     void robot_setup(void) {
@@ -58,7 +61,12 @@ uint32_t batt(void);         //mV
       #endif
 
       #ifdef ESC_ARMA
+        #warning "ESC_ARMA"
         arma.attach(ESC_ARMA);
+      #endif
+      #ifdef ESC_ARMA_SEC
+        #warning "ESC_ARMA SEC"
+        arma_sec.attach(ESC_ARMA_SEC);
       #endif
 
       #if defined(motor_arma_m1) && defined(motor_arma_m2)
@@ -96,18 +104,26 @@ uint32_t batt(void);         //mV
         motor(motor_dir_m1, motor_dir_m2, dir);
     }
 
-    void hite(vel_t vel) {
+    void hite(vel_t va, vel_t vb) {
       #ifdef ARMA_DIGITAL
-        vel = map(vel, -VEL_MAX, VEL_MAX, 0, VEL_MAX);
+        va = map(va, -VEL_MAX, VEL_MAX, 0, VEL_MAX);
+      #endif //! ver jeito melhor de lidar com isso
+      #ifdef ARMA_SEC_DIGITAL
+        vb = map(vb, -VEL_MAX, VEL_MAX, 0, VEL_MAX);
       #endif //! ver jeito melhor de lidar com isso
 
       #ifdef ESC_ARMA
-        #warning "esc experimental!"
-        arma.write(map(vel, -VEL_MAX, VEL_MAX, 0, 180));
+        #warning "ESC_ARMA"
+        arma.write(map(va, -VEL_MAX, VEL_MAX, 0, 180));
+      #endif
+      #ifdef ESC_ARMA_SEC
+        #warning "ESC_ARMA SEC"
+        arma_sec.write(map(vb, -VEL_MAX, VEL_MAX, 0, 180));
       #endif
 
+      //! falta usar arma sec com motor dc
       #if defined(motor_arma_m1) && defined(motor_arma_m2)
-        motor(motor_arma_m1, motor_arma_m2, vel);
+        motor(motor_arma_m1, motor_arma_m2, va);
       #endif
     }
     void bipe(int dt) { //! números do bipe
