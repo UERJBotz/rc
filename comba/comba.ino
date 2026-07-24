@@ -8,6 +8,7 @@
 #define BAUD_RATE 115200
 #define IDX_VEL 0
 #define IDX_ESC 1
+#define IDX_EXT 2
 
 #define memeql(a,b,sz) (memcmp(a,b,sz) == 0)
 #define LEN(arr) (sizeof(arr)/sizeof(*arr))
@@ -62,11 +63,11 @@ void setup() {
 }
 
 void loop() {
-    struct vel vel_rodas{0}, vel_esc{0}, extra{0};
-    if ((millis() - t_recv) < 1000) {
-        vel_rodas = vels.of[IDX_VEL];
-        vel_esc   = vels.of[IDX_ESC];
-        extra     = vels.of[2]; //! mágico
+    struct vel vel_rodas = vels.of[IDX_VEL],
+               vel_esc   = vels.of[IDX_ESC],
+               extra     = vels.of[IDX_EXT];
+    if ((millis() - t_recv) > 1000) {
+        vel_rodas = vel_esc = extra = {0, 0};
     }
 
     move(vel_rodas.esq, vel_rodas.dir);

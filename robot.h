@@ -13,6 +13,10 @@ uint32_t batt(void);         //mV
     #error "constante VEL_MAX precisa ter um valor são"
 #endif
 
+#define constrmap(x, min, max, out_min, out_max) ( \
+        constrain(map(x, min, max, out_min, out_max), \
+                                   out_min, out_max))
+
 #if defined(VESPA)
     #include <RoboCore_Vespa.h>
 
@@ -103,14 +107,8 @@ uint32_t batt(void);         //mV
         }
     }
     void move(vel_t esq, vel_t dir) {
-        esq = constrain(
-            map(esq, -VEL_MAX, VEL_MAX, -1023, 1023),
-            -1023, 1023
-        );
-        dir = constrain(
-            map(dir, -VEL_MAX, VEL_MAX, -1023, 1023),
-            -1023, 1023
-        );
+        esq = constrmap(esq, -VEL_MAX, VEL_MAX, -1023, 1023));
+        dir = constrmap(dir, -VEL_MAX, VEL_MAX, -1023, 1023));
 
         motor(motor_esq_m1, motor_esq_m2, esq);
         motor(motor_dir_m1, motor_dir_m2, dir);
@@ -118,11 +116,11 @@ uint32_t batt(void);         //mV
 
     void hite(vel_t va, vel_t vb) {
       #ifdef ARMA_DIGITAL
-        va = map(va, -VEL_MAX, VEL_MAX, 0, VEL_MAX);
-      #endif //! ver jeito melhor de lidar com isso
+        va = constrmap(va, -VEL_MAX, VEL_MAX, 0, VEL_MAX);
+      #endif //! ver jeito melhor de lidar com isso? (no controle talvez)
       #ifdef ARMA_SEC_DIGITAL
-        vb = map(vb, -VEL_MAX, VEL_MAX, 0, VEL_MAX);
-      #endif //! ver jeito melhor de lidar com isso
+        vb = constrmap(vb, -VEL_MAX, VEL_MAX, 0, VEL_MAX);
+      #endif //! ver jeito melhor de lidar com isso? (no controle talvez)
 
       #ifdef ESC_ARMA
         arma.write(map(va, -VEL_MAX, VEL_MAX,
