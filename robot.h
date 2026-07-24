@@ -44,8 +44,20 @@ uint32_t batt(void);         //mV
         #if defined(motor_arma_m1) || defined(motor_arma_m2)
             #error "escolha entre esc e ponte h para a arma"
         #endif
-        #warning "esc experimental!"
-        //! falta checar melhor erros e tal
+        #warning "esc experimental!" //! falta checar melhor erros e tal
+
+        #ifndef PULSO_MIN_ARMA
+            #define PULSO_MIN_ARMA 0
+        #endif
+        #ifndef PULSO_MAX_ARMA
+            #define PULSO_MAX_ARMA 180
+        #endif
+        #ifndef PULSO_MIN_ARMA_SEC
+            #define PULSO_MIN_ARMA_SEC 0
+        #endif
+        #ifndef PULSO_MAX_ARMA_SEC
+            #define PULSO_MAX_ARMA_SEC 180
+        #endif
 
         #include <Servo.h>
         Servo arma;
@@ -113,12 +125,12 @@ uint32_t batt(void);         //mV
       #endif //! ver jeito melhor de lidar com isso
 
       #ifdef ESC_ARMA
-        #warning "ESC_ARMA"
-        arma.write(map(va, -VEL_MAX, VEL_MAX, 0, 180));
+        arma.write(map(va, -VEL_MAX, VEL_MAX,
+                           PULSO_MIN_ARMA, PULSO_MAX_ARMA));
       #endif
       #ifdef ESC_ARMA_SEC
-        #warning "ESC_ARMA SEC"
-        arma_sec.write(map(vb, -VEL_MAX, VEL_MAX, 0, 180));
+        arma_sec.write(map(vb, -VEL_MAX, VEL_MAX,
+                           PULSO_MIN_ARMA_SEC, PULSO_MAX_ARMA_SEC));
       #endif
 
       //! falta usar arma sec com motor dc
