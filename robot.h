@@ -2,9 +2,11 @@ typedef int16_t vel_t;
 
 void     robot_setup(void);
 void     move(vel_t, vel_t); //-VEL_MAX a VEL_MAX
-void     hite(vel_t, vel_t=0); //-VEL_MAX a VEL_MAX
+void     hite(vel_t, vel_t); //-VEL_MAX a VEL_MAX
 void     bipe(int);          //millis
 uint32_t batt(void);         //mV
+
+#ifndef ROBOT_H_HEADER
 
 #if !defined(VEL_MAX)
     #error "constante VEL_MAX precisa estar definida"
@@ -153,3 +155,5 @@ uint32_t batt(void);         //mV
     #error "robôs por enquanto só vespa ou comba"
 #endif
 
+#endif //ROBOT_H_HEADER
+#undef ROBOT_H_HEADER
