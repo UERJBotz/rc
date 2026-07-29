@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 #define VEL_MAX 127
-#include "g3.h" // esse include muda os pinos e controle do robô
+#include "demolidor.h" // esse include muda os pinos e controle do robô
 #include "_robot.h" // esse tem uma implementação genérica dos robôs
 #include "_comms.h"
 
@@ -12,6 +12,7 @@
 
 #define memeql(a,b,sz) (memcmp(a,b,sz) == 0)
 #define LEN(arr) (sizeof(arr)/sizeof(*arr))
+
 
 struct vel { int16_t esq = 0, dir = 0; }; //! nomes
 union vels {
@@ -53,6 +54,9 @@ void on_recv(const esp_now_recv_info_t* info, const uint8_t* data, esp_now_len_t
     vels = str_to_vels(msg->vels, msg->len);
 }
 
+void _hite(vel_t, vel_t) __attribute__((weak));
+void _move(vel_t, vel_t) __attribute__((weak));
+
 void setup() {
     Serial.begin(BAUD_RATE);
 
@@ -70,8 +74,13 @@ void loop() {
         vel_rodas = vel_esc = extra = {0, 0};
     }
 
-    move(vel_rodas.esq, vel_rodas.dir);
-    hite(vel_esc.esq, vel_esc.dir);
+    if (_move)
+        _move(vel_rodas.esq, vel_rodas.dir);
+    else move(vel_rodas.esq, vel_rodas.dir);
+
+    if (_hite)
+        _hite(vel_esc.esq, vel_esc.dir);
+    else hite(vel_esc.esq, vel_esc.dir);
 
     //! print
     Serial.printf("vels %d %d, esc %d %d, n/a %d %d\n",
