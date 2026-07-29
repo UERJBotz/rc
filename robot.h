@@ -107,8 +107,8 @@ uint32_t batt(void);         //mV
         }
     }
     void move(vel_t esq, vel_t dir) {
-        esq = constrmap(esq, -VEL_MAX, VEL_MAX, -1023, 1023));
-        dir = constrmap(dir, -VEL_MAX, VEL_MAX, -1023, 1023));
+        esq = constrmap(esq, -VEL_MAX, VEL_MAX, -1023, 1023);
+        dir = constrmap(dir, -VEL_MAX, VEL_MAX, -1023, 1023);
 
         motor(motor_esq_m1, motor_esq_m2, esq);
         motor(motor_dir_m1, motor_dir_m2, dir);
