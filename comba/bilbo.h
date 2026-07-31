@@ -3,10 +3,10 @@
 #endif
 #define COMBA
 
-// wemos d1 mini (clone) - esp8266
+// Generic ESP8266 Module
 
 
-#define CONTROLE controle_roxo_j_verm
+#define CONTROLE controle_preto_j_verm
 
 #define D1 5
 #define D2 4
