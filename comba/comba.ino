@@ -5,7 +5,14 @@
 #include "_robot.h" // esse tem uma implementação genérica dos robôs
 #include "_comms.h"
 
-#define BAUD_RATE 115200
+#ifndef TEMPO_FAILSAFE
+  #define TEMPO_FAILSAFE 1000
+#endif
+
+#ifndef BAUD_RATE
+  #define BAUD_RATE 115200
+#endif
+
 #define IDX_VEL 0
 #define IDX_ESC 1
 #define IDX_EXT 2
@@ -70,7 +77,7 @@ void loop() {
     struct vel vel_rodas = vels.of[IDX_VEL],
                vel_esc   = vels.of[IDX_ESC],
                extra     = vels.of[IDX_EXT];
-    if ((millis() - t_recv) > 1000) {
+    if ((millis() - t_recv) > TEMPO_FAILSAFE) {
         vel_rodas = vel_esc = extra = {0, 0};
     }
 
