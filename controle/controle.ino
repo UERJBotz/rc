@@ -4,7 +4,7 @@
 #define MIXAR
 #define SUAVIZAR
 #define RECALIBRAR
-#include "controle_branco.h" // muda os pinos e configurações do controle
+#include "controle_pelado.h" // muda os pinos e configurações do controle
 
 // ideia: INTERRUPTOR_MIXAR
 //! lidar melhor com o(s) botão(ões)
@@ -37,23 +37,26 @@ struct par {
 struct par ponto_zero = PONTO_ZERO;
 bool inverter_esq_dir = false;
 
-volatile bool inverter = false;
-volatile unsigned long ultimo_clique = 0;
-void IRAM_ATTR ao_apertar(void) {
-    unsigned long t = millis();
-    if ((t - ultimo_clique) > 1000) {
-        inverter = !inverter;
-        ultimo_clique = t;
-    }
-}
+bool inverter_frente_tras = false;
+
+#ifdef BOTAO
+  volatile bool toggle_botao = false;
+  volatile unsigned long ultimo_clique = 0;
+  void IRAM_ATTR ao_apertar_botao(void) {
+      unsigned long t = millis();
+      if ((t - ultimo_clique) > 1000) {
+          toggle_botao = !toggle_botao;
+          ultimo_clique = t;
+      }
+  }
+#endif
 
 void setup() {
-    pinMode(EIXO_X, INPUT);
-    pinMode(EIXO_Y, INPUT);
-    pinMode(BOTAO, INPUT);
-
     pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN, LOW); //! isso muda, lidar melhor
+
+    pinMode(EIXO_X, INPUT);
+    pinMode(EIXO_Y, INPUT);
 
   #if defined(INTERRUPTOR_INVERTER_ESQ_DIR)
     pinMode(INTERRUPTOR_INVERTER_ESQ_DIR, INPUT_PULLDOWN);
@@ -101,7 +104,10 @@ void setup() {
     esp_err_t err = esp_now_add_peer(&peer);
     assert (err == ESP_OK);
 
-    attachInterrupt(digitalPinToInterrupt(BOTAO), ao_apertar, HIGH);
+  #if defined(BOTAO)
+    pinMode(BOTAO, INPUT);//_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(BOTAO), ao_apertar_botao, FALLING);
+  #endif
 }
 
 
@@ -110,14 +116,17 @@ void loop() {
         inverter_esq_dir = digitalRead(INTERRUPTOR_INVERTER_ESQ_DIR);
     #endif
     #ifdef INTERRUPTOR_INVERTER
-        inverter = digitalRead(INTERRUPTOR_INVERTER);
+        inverter_frente_tras = digitalRead(INTERRUPTOR_INVERTER);
+    #endif
+    #ifdef BOTAO_INVERTER
+        inverter_frente_tras = botao_toggle;
     #endif
 
     struct par roda = vels_roda();
     struct par arma = vels_arma();
 
     #ifdef DEBUG_INTERRUPTORES
-        Serial.printf("ied:%1d, ift:%1d,%5d,%5d: ", inverter_esq_dir, inverter, arma.a, arma.b);
+        Serial.printf("ied:%1d, ift:%1d,%5d,%5d: ", inverter_esq_dir, inverter_frente_tras, arma.a, arma.b);
     #endif
 
     esp_err_t err = send(roda, arma);
@@ -177,8 +186,8 @@ struct par vels_roda() {
         .x = adc_to_pwm(pos.x),
         .y = adc_to_pwm(pos.y),
     };
-    if (inverter_esq_dir) pos_pwm.x = -pos_pwm.x;
-    if (inverter)         pos_pwm.y = -pos_pwm.y;
+    if (inverter_esq_dir)     pos_pwm.x = -pos_pwm.x;
+    if (inverter_frente_tras) pos_pwm.y = -pos_pwm.y;
     struct par vel = mixar(pos_pwm.x, pos_pwm.y);
 
     #ifdef DEBUG_JOY_CONV
