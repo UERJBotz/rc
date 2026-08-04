@@ -5,7 +5,7 @@
 
 // nologo esp32c3 super mini
 
-#define CONTROLE controle_preto_j_verm
+#define CONTROLE controle_preto_j_preto
 
 #define LED LED_BUILTIN
 

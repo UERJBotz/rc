@@ -3,8 +3,8 @@
 #endif
 #define CONTROLE "preto_1j_preto"
 
-#define EIXO_X 2
-#define EIXO_Y 1
+#define EIXO_X 1
+#define EIXO_Y 2
 #define BOTAO  8
 
 #define EIXO_ARMA 3
