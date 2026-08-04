@@ -54,6 +54,13 @@ uint8_t* get_mac_addr() {
     return WiFi.macAddress(mac_addr);
 }
 
+void print_mac_addr() {
+    uint8_t* mac_addr = get_mac_addr();
+    Serial.printf("MAC: {0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X}\n",
+                  mac_addr[0], mac_addr[1], mac_addr[2],
+                  mac_addr[3], mac_addr[4], mac_addr[5]);
+}
+
 void espnow_setup(recv_cb_t on_recv) {
     init_wifi();
     uint8_t* mac_addr = get_mac_addr();

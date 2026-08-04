@@ -52,6 +52,8 @@ bool inverter_frente_tras = false;
 #endif
 
 void setup() {
+    Serial.begin(BAUD_RATE);
+
     pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN, LOW); //! isso muda, lidar melhor
 
@@ -86,15 +88,6 @@ void setup() {
   #endif
 
     init_wifi();
-    uint8_t* mac_addr = get_mac_addr();
-
-    Serial.begin(BAUD_RATE);
-    Serial.printf("MAC: {0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X}\n",
-                  mac_addr[0], mac_addr[1], mac_addr[2],
-                  mac_addr[3], mac_addr[4], mac_addr[5]);
-
-    Serial.printf("PONTO ZERO: %d, %d\n", ponto_zero.x, ponto_zero.y);
-
     static esp_now_peer_info_t peer {
         .channel = 0,
         .encrypt = false,
@@ -107,6 +100,10 @@ void setup() {
   #if defined(BOTAO)
     pinMode(BOTAO, INPUT);//_PULLUP);
     attachInterrupt(digitalPinToInterrupt(BOTAO), ao_apertar_botao, FALLING);
+
+    while (!digitalRead(BOTAO)) {
+        print_mac_addr(); delay(20);
+    }
   #endif
 }
 
@@ -119,7 +116,7 @@ void loop() {
         inverter_frente_tras = digitalRead(INTERRUPTOR_INVERTER);
     #endif
     #ifdef BOTAO_INVERTER
-        inverter_frente_tras = botao_toggle;
+        inverter_frente_tras = toggle_botao;
     #endif
 
     struct par roda = vels_roda();
