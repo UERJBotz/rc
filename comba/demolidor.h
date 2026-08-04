@@ -9,10 +9,10 @@
 
 #define LED LED_BUILTIN
 
-#define motor_esq_m1 0
-#define motor_esq_m2 1
-#define motor_dir_m1 2
-#define motor_dir_m2 3
+#define motor_esq_m1 2
+#define motor_esq_m2 3
+#define motor_dir_m1 0
+#define motor_dir_m2 1
 
 #define ROBOT_H_HEADER
 #include "_robot.h"
