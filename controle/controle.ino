@@ -4,7 +4,7 @@
 #define MIXAR
 #define SUAVIZAR
 #define RECALIBRAR
-#include "controle_pelado.h" // muda os pinos e configurações do controle
+#include "controle_preto_j_preto.h" // muda os pinos e configurações do controle
 
 // ideia: INTERRUPTOR_MIXAR
 //! lidar melhor com o(s) botão(ões)

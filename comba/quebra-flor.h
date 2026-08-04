@@ -3,7 +3,7 @@
 #endif
 #define COMBA
 
-// Wemos D1 mini (clone) - esp8266 (+ l298n + drv8833)
+// Nologo esp32c3 super mini
 
 
 #define CONTROLE controle_preto_j_verm
@@ -11,10 +11,10 @@
 
 #define LED LED_BUILTIN
 
-#define motor_esq_m1 D0
-#define motor_esq_m2 D5
-#define motor_dir_m1 D6
-#define motor_dir_m2 D7
+#define motor_esq_m1 5
+#define motor_esq_m2 6
+#define motor_dir_m1 7
+#define motor_dir_m2 8
 
-#define motor_arma_m1 D1
-#define motor_arma_m2 D2
+#define motor_arma_m1 9
+#define motor_arma_m2 10
