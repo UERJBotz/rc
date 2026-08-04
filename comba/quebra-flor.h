@@ -11,10 +11,10 @@
 
 #define LED LED_BUILTIN
 
-#define motor_esq_m1 5
-#define motor_esq_m2 6
-#define motor_dir_m1 7
-#define motor_dir_m2 8
+#define motor_esq_m1 6
+#define motor_esq_m2 5
+#define motor_dir_m1 8
+#define motor_dir_m2 7
 
 #define motor_arma_m1 9
 #define motor_arma_m2 10
