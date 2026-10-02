@@ -204,10 +204,12 @@ struct par analogico_corrigido() {
     return pos;
 }
 struct par analogico() {
-    Serial.printf("%d %d",
-        (int16_t)analogReadMilliVolts(EIXO_X),
-        (int16_t)analogReadMilliVolts(EIXO_Y)
-    );
+    #ifdef DEBUG_JOY_CONV
+        Serial.printf("%d %d",
+            (int16_t)analogReadMilliVolts(EIXO_X),
+            (int16_t)analogReadMilliVolts(EIXO_Y)
+        );
+    #endif
     return {
         .x = (int16_t)analogRead(EIXO_X),
         .y = (int16_t)analogRead(EIXO_Y),
@@ -216,6 +218,20 @@ struct par analogico() {
 
 struct par deadzone(int16_t x, int16_t y) {
     const struct par zero = ponto_zero;
+
+#ifdef DEADZONE_EM_FAIXAS
+#warning "deadzone EXPERIMENTAL"
+    return {
+        .x = (x > zero.x + FAIXA_MORTA) ?
+             map(x, zero.x + FAIXA_MORTA, ADC_MAX, ADC_MAX/2, ADC_MAX) :
+             (x < zero.x - FAIXA_MORTA) ?
+             map(x, 0,zero.x - FAIXA_MORTA, 0,ADC_MAX/2) : 0,
+        .y = (y > zero.y + FAIXA_MORTA) ?
+             map(y, zero.y + FAIXA_MORTA, ADC_MAX, ADC_MAX/2, ADC_MAX) :
+             (y < zero.y - FAIXA_MORTA) ?
+             map(y, 0,zero.y - FAIXA_MORTA, 0,ADC_MAX/2) : 0,
+    };
+#else
     return {
         .x = (x > zero.x) ?
              map(x, zero.x,ADC_MAX, ADC_MAX/2, ADC_MAX) :
@@ -224,6 +240,7 @@ struct par deadzone(int16_t x, int16_t y) {
              map(y, zero.y,ADC_MAX, ADC_MAX/2, ADC_MAX) :
              map(y, 0,     zero.y,  0,       ADC_MAX/2),
     };
+#endif
 }
 struct par sinalizar(int16_t x, int16_t y, int16_t max) {
     return {
