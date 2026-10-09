@@ -4,7 +4,7 @@
 #define MIXAR
 #define SUAVIZAR
 #define RECALIBRAR
-#include "controle_preto_j_preto.h" // muda os pinos e configurações do controle
+#include "controle_preto_j_verm.h" // muda os pinos e configurações do controle
 
 // ideia: INTERRUPTOR_MIXAR
 //! lidar melhor com o(s) botão(ões)
@@ -159,7 +159,7 @@ struct par vels_arma() {
     int16_t vel_arma = 0;
   #if defined(EIXO_ARMA)
     #if defined(ARMA_DIGITAL)
-      vel_arma = digital_to_pwm(digitalRead(EIXO_ARMA));
+      vel_arma = trigital_to_pwm(digitalRead(EIXO_ARMA));
     #else
       vel_arma = adc_to_pwm(analogRead(EIXO_ARMA));
     #endif // ARMA_DIGITAL
@@ -168,7 +168,7 @@ struct par vels_arma() {
     int16_t vel_arma_sec = 0;
   #if defined(EIXO_ARMA_SEC)
     #if defined(ARMA_SEC_DIGITAL)
-      vel_arma_sec = digital_to_pwm(digitalRead(EIXO_ARMA_SEC));
+      vel_arma_sec = trigital_to_pwm(digitalRead(EIXO_ARMA_SEC));
     #else
       vel_arma_sec = adc_to_pwm(analogRead(EIXO_ARMA_SEC));
     #endif // ARMA_SEC_DIGITAL
@@ -272,6 +272,9 @@ struct par mixar(int16_t x, int16_t y) {
   #endif
 }
 
+int16_t trigital_to_pwm(bool d) {
+    return d ? PWM_MAX : 0;
+}
 int16_t digital_to_pwm(bool d) {
     return d ? PWM_MAX : -PWM_MAX;
 }

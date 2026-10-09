@@ -117,12 +117,8 @@ uint32_t batt(void);         //mV
     }
 
     void hite(vel_t va, vel_t vb) {
-      #ifdef ARMA_DIGITAL
-        va = constrmap(va, -VEL_MAX, VEL_MAX, 0, VEL_MAX);
-      #endif //! ver jeito melhor de lidar com isso? (no controle talvez)
-      #ifdef ARMA_SEC_DIGITAL
-        vb = constrmap(vb, -VEL_MAX, VEL_MAX, 0, VEL_MAX);
-      #endif //! ver jeito melhor de lidar com isso? (no controle talvez)
+      va = constrain(va, -VEL_MAX, VEL_MAX);
+      vb = constrain(vb, -VEL_MAX, VEL_MAX);
 
       #ifdef ESC_ARMA
         arma.write(map(va, -VEL_MAX, VEL_MAX,

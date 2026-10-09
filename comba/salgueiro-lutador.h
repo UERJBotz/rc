@@ -7,7 +7,6 @@
 
 
 #define CONTROLE controle_preto_j_verm
-#define ARMA_DIGITAL //! isso deveria vir com o controle de alguma forma
 
 #define LED LED_BUILTIN
 
